@@ -1,0 +1,79 @@
+---
+title: "날씨API 사용"
+author: "eunkwang"
+date: "2017년 8월 13일"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 날씨 API 둘러보기
+<hr>
+
+닐씨 API를 제공하는 서비스들을 둘러보았으며 대략 세가지 정도 확인 가능하였음.   
+1. 기상자료개발포털(https://data.kma.go.kr/api/selectApiList.do)    
+2. 케이웨더(https://api.kweather.co.kr/apiguide/present.html)   
+3. SK 플래닛(https://developers.skplanetx.com/apidoc/kor/weather/information/#doc1168)    
+
+기상청의 경우 공공 데이터 포털에서 자료를 제공하고 있으나 회원가입과 자료사용신청등의 복잡한 절차를 거쳐야 함.
+사용하기까지 어려움이 있기 때문에 패스함.
+
+간단히 SK 플래닛에서 제공하는 API를 활용하여 특정 지역의 날씨 데이터를 가져와 보겠음
+관련 라이브러리는 "httr" 이며 https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html 페이지를 참고하였음
+
+케이웨더 또한 회원 가입 후 메일인증을하고 해당 API에 대한 사용 승인을 받아야 사용할 수 있어 일단 패스
+
+
+```{r loadlibrary}
+library(httr)
+library(jsonlite)
+```
+
+```{r apitest}
+# 인증코드를 포함하여 불러오기
+r <- GET("http://apis.skplanetx.com/weather/current/hourly"
+         ,add_headers(appKey = "서비스키")
+         ,query = list(version = "1"
+                       , city = "서울"
+                       , county = "강남구"
+                       , village = "도곡동")
+)
+
+# 데이터 가져오기
+data <- content(r)
+str(data)
+df <- as.data.frame(data$weather)
+```
+
+
+## 함수로 wrapping 하기
+<hr>
+
+```{r makefunction}
+apiget <- function(baseurl, key, querylist){
+  r <- GET(baseurl
+           , add_headers(appKey = key)
+           , query = querylist, accept_json())
+  result <- content(r, "text")
+  return(result)
+}
+
+baseurl <- "http://apis.skplanetx.com/weather/current/hourly"
+key <- '서비스키'
+querylist <- list(version = '1'
+                  , city = '서울'
+                  , county = '강남구'
+                  , village = '도곡동')
+
+data2 <- apiget(baseurl, key, querylist)
+print(fromJSON(data2))
+```
+
+## 참고 내용
+httr에서 값을 리턴할 때 json 구조를 R 객체 구조로 리턴하기 때문에 굳이 jsonlite 의 fromJSON 함수로 받을 필요가 없음.
+
+## 참고 링크
+https://stackoverflow.com/questions/40289067/r-fromjson-how-to-send-headers-info
+
