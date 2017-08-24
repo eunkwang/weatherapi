@@ -1,0 +1,54 @@
+---
+title: "기상청자료 API 활용하기"
+author: "eunkwang"
+date: "2017년 8월 24일"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## 기상청 자료 API 활용하기
+본 문서는 아래 사이트에서 제공하는 xml 형식의 api 문서 중 일부 항목에 대해서 데이터를 가져와 파싱하여 데이터프레임으로 저장하는 방식을 설명한 문서임
+
+https://data.kma.go.kr/api/selectApiDetail.do
+
+테스트 데이터는 해양 관측 지점 일람표이며 다음과 같음
+
+1. 해양기상지점부이일람표 https://data.kma.go.kr/OPEN_API/SEAM/2017/06/XML/stn_buoy.xml
+2. 등고지점일람표 https://data.kma.go.kr/OPEN_API/SEAM/2017/06/XML/stn_lhaws.xml
+3. 파고지점부이일람표 https://data.kma.go.kr/OPEN_API/SEAM/2017/06/XML/stn_waveBuoy.xml
+
+## 라이브러리 로드
+
+```{r}
+
+library(httr)
+library(XML)
+```
+
+## 데이터 처리
+
+```{r}
+buoy <- 'stn_buoy.xml'
+lhaws <- 'stn_lhaws.xml'
+wavebuoy <- 'stn_waveBuoy.xml'
+
+runAPI <- function(month='2017/06', type = buoy){
+  url <- paste0("https://data.kma.go.kr/OPEN_API/SEAM/", month, "/XML/", type)
+  getXml <- getURL(url, .opts = list(ssl.verifypeer = FALSE))
+  df <- cbind(month, xmlToDataFrame(getXml))
+  return(df)
+}
+
+runAPI('2017/05', buoy)
+runAPI('2017/05', lhaws)
+runAPI('2017/05', wavebuoy)
+
+```
+
+정상적으로 데이터를 불러옮을 확인할 수 있음
+
+끝
