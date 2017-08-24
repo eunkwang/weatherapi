@@ -24,14 +24,13 @@ https://data.kma.go.kr/api/selectApiDetail.do
 ## 라이브러리 로드
 
 ```{r}
-
-library(httr)
 library(XML)
+library(RCurl)
 ```
 
 ## 데이터 처리
 
-```{r}
+```{r runapi, echo = T}
 buoy <- 'stn_buoy.xml'
 lhaws <- 'stn_lhaws.xml'
 wavebuoy <- 'stn_waveBuoy.xml'
@@ -51,4 +50,4 @@ runAPI('2017/05', wavebuoy)
 
 정상적으로 데이터를 불러옮을 확인할 수 있음
 
-끝
+-끝-
